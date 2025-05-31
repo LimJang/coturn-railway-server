@@ -1,25 +1,25 @@
 FROM coturn/coturn:latest
 
-# Railway 환경 최적화
+# Root 권한 설정
 USER root
 
-# 필요한 패키지 설치
+# 필수 패키지 설치
 RUN apt-get update && apt-get install -y wget curl && rm -rf /var/lib/apt/lists/*
 
-# CoTURN 설정 생성
-RUN echo "listening-port=\$PORT" > /etc/turnserver.conf && \
-    echo "min-port=49152" >> /etc/turnserver.conf && \
-    echo "max-port=65535" >> /etc/turnserver.conf && \
-    echo "lt-cred-mech" >> /etc/turnserver.conf && \
-    echo "user=railway:RailwayP2P123!" >> /etc/turnserver.conf && \
-    echo "user=student:FastConnect456!" >> /etc/turnserver.conf && \
-    echo "realm=railway.webrtc" >> /etc/turnserver.conf && \
-    echo "verbose" >> /etc/turnserver.conf && \
-    echo "fingerprint" >> /etc/turnserver.conf && \
-    echo "log-file=stdout" >> /etc/turnserver.conf
+# CoTURN 설정 파일 생성 (문법 오류 수정)
+RUN echo "listening-port=3478" > /tmp/turnserver.conf
+RUN echo "min-port=49152" >> /tmp/turnserver.conf
+RUN echo "max-port=65535" >> /tmp/turnserver.conf
+RUN echo "lt-cred-mech" >> /tmp/turnserver.conf
+RUN echo "user=railway:RailwayP2P123!" >> /tmp/turnserver.conf
+RUN echo "user=student:FastConnect456!" >> /tmp/turnserver.conf
+RUN echo "realm=railway.webrtc" >> /tmp/turnserver.conf
+RUN echo "verbose" >> /tmp/turnserver.conf
+RUN echo "fingerprint" >> /tmp/turnserver.conf
+RUN echo "log-file=stdout" >> /tmp/turnserver.conf
 
-# Railway 포트 설정
-EXPOSE $PORT
+# 포트 노출
+EXPOSE 3478
 
-# CoTURN 시작
-CMD ["sh", "-c", "turnserver -c /etc/turnserver.conf --external-ip=$(wget -qO- http://ifconfig.me || echo '0.0.0.0') --listening-port=$PORT"]
+# CoTURN 서버 시작 (간단한 명령어)
+CMD ["/usr/bin/turnserver", "-c", "/tmp/turnserver.conf", "--external-ip=0.0.0.0"]
